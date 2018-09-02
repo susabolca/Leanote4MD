@@ -17,6 +17,8 @@ from StringIO import StringIO
 from requests_toolbelt import SSLAdapter
 import ssl
 
+from requests.packages import urllib3
+urllib3.disable_warnings()
 
 def is_ok(myjson):
     try:
@@ -44,7 +46,7 @@ def req_get(url, param = '', type = 'json', token = True):
     s = requests.Session()
     if leanote_host.startswith('https'):
         s.mount('https://', SSLAdapter(ssl.PROTOCOL_TLSv1))
-    r = s.get(leanote_host + '/api/' + url, params = param)
+    r = s.get(leanote_host + '/api/' + url, params = param, verify=False)
     if r.status_code == requests.codes.ok:
         if type=='json':
             if is_ok(r.text):
@@ -74,7 +76,7 @@ def req_post(url, param = '', type = 'json', token = True):
     s = requests.Session()
     if leanote_host.startswith('https'):
         s.mount('https://', SSLAdapter(ssl.PROTOCOL_TLSv1))
-    r = s.post(leanote_host + '/api/' + url, data = param)
+    r = s.post(leanote_host + '/api/' + url, data = param, verify=False)
     if r.status_code == requests.codes.ok:
         if type=='json':
             if is_ok(r.text):
@@ -253,7 +255,8 @@ def saveToFile(notes, noteBooks, path = '.'):
                             print 'saving its image: %s.%s' %(attach['FileId'], i.format)
                             i.save(attach['FileId'] + '.' + i.format)
 
-        except:
+        except Exception as e:
+            logging.exception(e) 
             print "error: ", filename
 
 
